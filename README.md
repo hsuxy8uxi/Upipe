@@ -5,7 +5,7 @@
 
 <h1 align="center">Upipe</h1>
 
-Upipe is a lightweight Android streaming app with its own package identity, launcher icons, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
+Upipe is a lightweight Android streaming app for Android with an ad-free and smooth experience. The current Android application ID is `com.upipe.app`.
 
 
 ## Contribute
@@ -14,6 +14,13 @@ Upipe grows through testing, translations, design feedback, and code contributio
 
 ## About Upipe
 I forked NewPipe in July 2026 due to personal preferences, and have been working on the project independently since. Upipe does not recieve any updates from NewPipe, and problems that occur in NewPipe may not necessarily occur in Upipe. I do plan to add many features that weren't in the original, and to improve user experience.
+
+## Features
+* Improved interface with bottom, not top, navigation
+* Removed trending tabs
+* Unified feeds
+* Private
+* All media is downloadable!
 
 ## Download Builds
 
