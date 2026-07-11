@@ -59,4 +59,11 @@
         android:key="@string/debug_pref_screen_key"
         android:title="@string/settings_category_debug_title"
         app:iconSpaceReserved="false" />
+
+    <Preference
+        android:icon="@drawable/ic_info_outline"
+        android:key="@string/about_pref_screen_key"
+        android:summary="@string/library_about_summary"
+        android:title="@string/title_activity_about"
+        app:iconSpaceReserved="false" />
 </PreferenceScreen>

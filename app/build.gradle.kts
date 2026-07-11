@@ -67,9 +67,9 @@ configure<ApplicationExtension> {
         minSdk = 21
         targetSdk = 35
 
-        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: 2
+        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: 3
 
-        versionName = "v1.1.0"
+        versionName = "v1.2.0"
         System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -93,8 +93,10 @@ configure<ApplicationExtension> {
         }
 
         release {
-            if (hasReleaseSigningConfig) {
-                signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (hasReleaseSigningConfig) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
             }
             System.getProperty("packageSuffix")?.let { suffix ->
                 applicationIdSuffix = suffix

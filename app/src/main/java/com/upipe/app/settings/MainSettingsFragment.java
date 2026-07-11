@@ -6,9 +6,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.preference.Preference;
 
 import com.upipe.app.MainActivity;
 import com.upipe.app.R;
+import com.upipe.app.util.NavigationHelper;
 import com.upipe.app.util.ReleaseVersionUtil;
 
 public class MainSettingsFragment extends BasePreferenceFragment {
@@ -57,6 +59,16 @@ public class MainSettingsFragment extends BasePreferenceFragment {
             settingsActivity.setSearchActive(true);
             return true;
         });
+    }
+
+    @Override
+    public boolean onPreferenceTreeClick(@NonNull final Preference preference) {
+        if (getString(R.string.about_pref_screen_key).equals(preference.getKey())) {
+            NavigationHelper.openAbout(requireContext());
+            return true;
+        }
+
+        return super.onPreferenceTreeClick(preference);
     }
 
     @Override

@@ -237,6 +237,7 @@
     <string name="last_resize_mode">last_resize_mode</string>
 
     <string name="reset_settings">reset_settings</string>
+    <string name="about_pref_screen_key">about_pref_screen_key</string>
 
     <!-- DEBUG ONLY -->
     <string name="debug_pref_screen_key">debug_pref_screen_key</string>

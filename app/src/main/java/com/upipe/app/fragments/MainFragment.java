@@ -302,7 +302,11 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
             NavigationHelper.openSettings(requireContext());
             final int restoredPosition = Math.min(lastNonSettingsTabPosition,
                     Math.max(0, tabsList.size() - 1));
-            binding.pager.post(() -> binding.pager.setCurrentItem(restoredPosition, false));
+            binding.pager.post(() -> {
+                if (binding != null) {
+                    binding.pager.setCurrentItem(restoredPosition, false);
+                }
+            });
             return true;
         }
 

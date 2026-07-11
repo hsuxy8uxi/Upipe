@@ -1,5 +1,6 @@
 package com.upipe.app.fragments;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
@@ -26,8 +27,8 @@ import androidx.appcompat.app.AlertDialog;
 import com.upipe.app.BaseFragment;
 import com.upipe.app.NewPipeDatabase;
 import com.upipe.app.R;
-import com.upipe.app.database.history.model.StreamHistoryEntry;
 import com.upipe.app.database.playlist.PlaylistMetadataEntry;
+import com.upipe.app.database.stream.StreamStatisticsEntry;
 import com.upipe.app.database.stream.model.StreamEntity;
 import com.upipe.app.local.history.HistoryRecordManager;
 import com.upipe.app.local.playlist.LocalPlaylistManager;
@@ -35,17 +36,21 @@ import com.upipe.app.local.subscription.SubscriptionManager;
 import com.upipe.app.util.Localization;
 import com.upipe.app.util.NavigationHelper;
 import com.upipe.app.util.image.CoilHelper;
+import com.upipe.app.views.AnimatedProgressBar;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public final class LibraryFragment extends BaseFragment {
-    private static final int PREVIEW_CARD_WIDTH_DP = 212;
-    private static final int MAX_PREVIEW_ITEMS = 10;
+    private static final int MAX_HISTORY_PREVIEW_ITEMS = 5;
+    private static final int MAX_PLAYLIST_PREVIEW_ITEMS = 10;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -59,7 +64,6 @@ public final class LibraryFragment extends BaseFragment {
 
     private int subscriptionCount;
     private int playlistCount;
-    private int recentVideoCount;
 
     @Nullable
     @Override
@@ -86,6 +90,8 @@ public final class LibraryFragment extends BaseFragment {
                 rootView.findViewById(R.id.library_history_scroller));
         keepPagerFromStealingHorizontalScroll(
                 rootView.findViewById(R.id.library_playlists_scroller));
+        keepPagerFromStealingHorizontalScroll(historyPreview);
+        keepPagerFromStealingHorizontalScroll(playlistsPreview);
 
         subscribeToLibraryData();
     }
@@ -100,8 +106,6 @@ public final class LibraryFragment extends BaseFragment {
                 .setOnClickListener(v -> NavigationHelper.openBookmarksFragment(getFM()));
         rootView.findViewById(R.id.library_history)
                 .setOnClickListener(v -> NavigationHelper.openStatisticFragment(getFM()));
-        rootView.findViewById(R.id.library_about)
-                .setOnClickListener(v -> NavigationHelper.openAbout(requireContext()));
     }
 
     @Override
@@ -128,7 +132,7 @@ public final class LibraryFragment extends BaseFragment {
                 new HistoryRecordManager(requireContext());
         final SubscriptionManager subscriptionManager = new SubscriptionManager(requireContext());
 
-        disposables.add(historyRecordManager.getStreamHistory()
+        disposables.add(historyRecordManager.getStreamStatistics()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::renderHistoryPreview,
                         throwable -> renderHistoryPreview(Collections.emptyList())));
@@ -156,17 +160,13 @@ public final class LibraryFragment extends BaseFragment {
                 }));
     }
 
-    private void renderHistoryPreview(final List<StreamHistoryEntry> history) {
+    private void renderHistoryPreview(final List<StreamStatisticsEntry> history) {
         if (!isAdded() || historyPreview == null || historySummary == null) {
             return;
         }
 
         historyPreview.removeAllViews();
-        recentVideoCount = history.size();
-        historySummary.setText(getResources().getQuantityString(
-                R.plurals.library_recent_videos_count,
-                recentVideoCount,
-                recentVideoCount));
+        historySummary.setText(R.string.library_history_summary);
 
         if (history.isEmpty()) {
             historyPreview.addView(createEmptyCard(R.drawable.ic_history,
@@ -174,9 +174,20 @@ public final class LibraryFragment extends BaseFragment {
                     getString(R.string.library_empty_history_summary),
                     () -> NavigationHelper.openStatisticFragment(getFM())));
         } else {
-            final int previewCount = Math.min(history.size(), MAX_PREVIEW_ITEMS);
+            final List<StreamStatisticsEntry> sortedHistory = new ArrayList<>(history);
+            sortedHistory.sort(Comparator.comparing(
+                    StreamStatisticsEntry::getLatestAccessDate).reversed());
+
+            final int previewCount = Math.min(sortedHistory.size(), MAX_HISTORY_PREVIEW_ITEMS);
             for (int i = 0; i < previewCount; i++) {
-                historyPreview.addView(createHistoryCard(history.get(i)));
+                historyPreview.addView(createHistoryCard(sortedHistory.get(i)));
+            }
+
+            if (sortedHistory.size() > MAX_HISTORY_PREVIEW_ITEMS) {
+                historyPreview.addView(createEmptyCard(R.drawable.ic_history,
+                        getString(R.string.library_see_more_history),
+                        getString(R.string.library_see_more_history_summary),
+                        () -> NavigationHelper.openStatisticFragment(getFM())));
             }
         }
 
@@ -201,7 +212,7 @@ public final class LibraryFragment extends BaseFragment {
                     getString(R.string.library_empty_playlists_summary),
                     this::showCreatePlaylistDialog));
         } else {
-            final int previewCount = Math.min(playlists.size(), MAX_PREVIEW_ITEMS);
+            final int previewCount = Math.min(playlists.size(), MAX_PLAYLIST_PREVIEW_ITEMS);
             for (int i = 0; i < previewCount; i++) {
                 playlistsPreview.addView(createPlaylistCard(playlists.get(i)));
             }
@@ -210,10 +221,11 @@ public final class LibraryFragment extends BaseFragment {
         updateProfileSummary();
     }
 
-    private View createHistoryCard(final StreamHistoryEntry entry) {
+    private View createHistoryCard(final StreamStatisticsEntry entry) {
         final View card = LayoutInflater.from(requireContext())
                 .inflate(R.layout.list_stream_card_item, historyPreview, false);
         card.setLayoutParams(previewCardLayoutParams());
+        keepPagerFromStealingHorizontalScroll(card);
 
         final StreamEntity stream = entry.getStreamEntity();
         final ImageView thumbnail = card.findViewById(R.id.itemThumbnailView);
@@ -221,12 +233,12 @@ public final class LibraryFragment extends BaseFragment {
         final TextView uploader = card.findViewById(R.id.itemUploaderView);
         final TextView duration = card.findViewById(R.id.itemDurationView);
         final TextView additionalDetails = card.findViewById(R.id.itemAdditionalDetails);
-        final View progress = card.findViewById(R.id.itemProgressView);
+        final AnimatedProgressBar progress = card.findViewById(R.id.itemProgressView);
 
         title.setText(stream.getTitle());
         uploader.setText(stream.getUploader());
         if (additionalDetails != null) {
-            additionalDetails.setText(Localization.relativeTime(entry.getAccessDate()));
+            additionalDetails.setText(Localization.relativeTime(entry.getLatestAccessDate()));
         }
         if (stream.getDuration() > 0) {
             duration.setText(Localization.getDurationString(stream.getDuration()));
@@ -234,7 +246,14 @@ public final class LibraryFragment extends BaseFragment {
         } else {
             duration.setVisibility(View.GONE);
         }
-        if (progress != null) {
+        if (progress != null && stream.getDuration() > 0 && entry.getProgressMillis() > 0) {
+            final int durationSeconds = (int) Math.min(Integer.MAX_VALUE, stream.getDuration());
+            final int progressSeconds = (int) Math.min(durationSeconds,
+                    TimeUnit.MILLISECONDS.toSeconds(entry.getProgressMillis()));
+            progress.setMax(durationSeconds);
+            progress.setProgress(progressSeconds);
+            progress.setVisibility(View.VISIBLE);
+        } else if (progress != null) {
             progress.setVisibility(View.GONE);
         }
 
@@ -248,6 +267,7 @@ public final class LibraryFragment extends BaseFragment {
         final View card = LayoutInflater.from(requireContext())
                 .inflate(R.layout.list_playlist_card_item, playlistsPreview, false);
         card.setLayoutParams(previewCardLayoutParams());
+        keepPagerFromStealingHorizontalScroll(card);
 
         final ImageView thumbnail = card.findViewById(R.id.itemThumbnailView);
         final TextView title = card.findViewById(R.id.itemTitleView);
@@ -276,9 +296,10 @@ public final class LibraryFragment extends BaseFragment {
         final LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER);
-        card.setPadding(dp(16), dp(14), dp(16), dp(14));
-        card.setMinimumHeight(dp(132));
+        card.setPadding(dp(10), dp(10), dp(10), dp(10));
+        card.setMinimumHeight(dp(104));
         card.setLayoutParams(previewCardLayoutParams());
+        keepPagerFromStealingHorizontalScroll(card);
         card.setClickable(true);
         card.setFocusable(true);
         applySelectableItemBackground(card);
@@ -288,7 +309,7 @@ public final class LibraryFragment extends BaseFragment {
         icon.setImageResource(iconRes);
         icon.setContentDescription(titleText);
         final LinearLayout.LayoutParams iconParams =
-                new LinearLayout.LayoutParams(dp(36), dp(36));
+                new LinearLayout.LayoutParams(dp(28), dp(28));
         card.addView(icon, iconParams);
 
         final TextView title = new TextView(requireContext());
@@ -297,8 +318,8 @@ public final class LibraryFragment extends BaseFragment {
         title.setTypeface(Typeface.DEFAULT_BOLD);
         title.setMaxLines(2);
         title.setEllipsize(TextUtils.TruncateAt.END);
-        title.setPadding(0, dp(10), 0, 0);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        title.setPadding(0, dp(8), 0, 0);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         card.addView(title, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -307,8 +328,8 @@ public final class LibraryFragment extends BaseFragment {
         summary.setGravity(Gravity.CENTER);
         summary.setMaxLines(3);
         summary.setEllipsize(TextUtils.TruncateAt.END);
-        summary.setPadding(0, dp(4), 0, 0);
-        summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        summary.setPadding(0, dp(3), 0, 0);
+        summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         card.addView(summary, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -316,24 +337,28 @@ public final class LibraryFragment extends BaseFragment {
     }
 
     private LinearLayout.LayoutParams previewCardLayoutParams() {
+        final int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        final int availableWidth = Math.max(dp(1), screenWidth - dp(56));
+        final int width = Math.max(dp(104), Math.min(dp(132), availableWidth / 3));
         final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                dp(PREVIEW_CARD_WIDTH_DP), ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMarginEnd(dp(12));
+                width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMarginEnd(dp(8));
         return params;
     }
 
     private void showCreatePlaylistDialog() {
-        if (playlistManager == null) {
+        final Context context = getContext();
+        if (context == null || playlistManager == null) {
             return;
         }
 
-        final EditText editText = new EditText(requireContext());
+        final EditText editText = new EditText(context);
         editText.setHint(R.string.name);
         editText.setSingleLine(true);
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
         editText.setPadding(dp(24), dp(8), dp(24), dp(8));
 
-        new AlertDialog.Builder(requireContext())
+        new AlertDialog.Builder(context)
                 .setTitle(R.string.create_playlist)
                 .setView(editText)
                 .setNegativeButton(R.string.cancel, null)
@@ -345,29 +370,36 @@ public final class LibraryFragment extends BaseFragment {
 
                     disposables.add(playlistManager.createEmptyPlaylist(name)
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(ignored -> Toast.makeText(requireContext(),
-                                            R.string.playlist_creation_success,
-                                            Toast.LENGTH_SHORT).show(),
-                                    throwable -> Toast.makeText(requireContext(),
-                                            R.string.general_error,
-                                            Toast.LENGTH_SHORT).show()));
+                            .subscribe(ignored -> showToast(R.string.playlist_creation_success),
+                                    throwable -> showToast(R.string.general_error)));
                 })
                 .show();
+    }
+
+    private void showToast(final int stringRes) {
+        final Context context = getContext();
+        if (context != null) {
+            Toast.makeText(context, stringRes, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateProfileSummary() {
         if (profileSummary != null) {
             profileSummary.setText(getString(R.string.library_profile_summary,
-                    subscriptionCount, playlistCount, recentVideoCount));
+                    subscriptionCount, playlistCount));
         }
     }
 
-    private void keepPagerFromStealingHorizontalScroll(final HorizontalScrollView scrollView) {
-        if (scrollView == null) {
+    private void keepPagerFromStealingHorizontalScroll(final View scrollableView) {
+        if (scrollableView == null) {
             return;
         }
 
-        scrollView.setOnTouchListener((view, event) -> {
+        if (scrollableView instanceof HorizontalScrollView) {
+            ((HorizontalScrollView) scrollableView).setSmoothScrollingEnabled(true);
+        }
+
+        scrollableView.setOnTouchListener((view, event) -> {
             final boolean disallow = event.getActionMasked() != MotionEvent.ACTION_UP
                     && event.getActionMasked() != MotionEvent.ACTION_CANCEL;
             requestDisallowParentIntercept(view, disallow);

@@ -37,7 +37,6 @@ import com.upipe.app.player.playqueue.SinglePlayQueue;
 import com.upipe.app.settings.HistorySettingsFragment;
 import com.upipe.app.util.NavigationHelper;
 import com.upipe.app.util.OnClickGesture;
-import com.upipe.app.util.PlayButtonHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -259,7 +258,7 @@ public class StatisticsPlaylistFragment
             return;
         }
 
-        playlistControlBinding.getRoot().setVisibility(View.VISIBLE);
+        playlistControlBinding.getRoot().setVisibility(View.GONE);
 
         itemListAdapter.clearStreamItemList();
 
@@ -273,8 +272,6 @@ public class StatisticsPlaylistFragment
             itemsList.getLayoutManager().onRestoreInstanceState(itemsListState);
             itemsListState = null;
         }
-
-        PlayButtonHelper.initPlaylistControlClickListener(activity, playlistControlBinding, this);
 
         headerBinding.sortButton.setOnClickListener(view -> toggleSortMode());
 
@@ -389,4 +386,3 @@ public class StatisticsPlaylistFragment
         MOST_PLAYED,
     }
 }
-

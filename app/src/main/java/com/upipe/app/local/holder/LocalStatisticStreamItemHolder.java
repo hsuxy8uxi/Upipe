@@ -14,9 +14,7 @@ import com.upipe.app.database.stream.StreamStatisticsEntry;
 import com.upipe.app.ktx.ViewUtils;
 import com.upipe.app.local.LocalItemBuilder;
 import com.upipe.app.local.history.HistoryRecordManager;
-import com.upipe.app.util.DependentPreferenceHelper;
 import com.upipe.app.util.Localization;
-import com.upipe.app.util.ServiceHelper;
 import com.upipe.app.util.image.CoilHelper;
 import com.upipe.app.views.AnimatedProgressBar;
 
@@ -74,9 +72,7 @@ public class LocalStatisticStreamItemHolder extends LocalItemHolder {
         return Localization.concatenateStrings(
                 // watchCount
                 Localization.shortViewCount(itemBuilder.getContext(), entry.getWatchCount()),
-                dateTimeFormatter.format(entry.getLatestAccessDate()),
-                // serviceName
-                ServiceHelper.getNameOfServiceById(entry.getStreamEntity().getServiceId()));
+                dateTimeFormatter.format(entry.getLatestAccessDate()));
     }
 
     @Override
@@ -98,8 +94,7 @@ public class LocalStatisticStreamItemHolder extends LocalItemHolder {
                     R.color.duration_background_color));
             itemDurationView.setVisibility(View.VISIBLE);
 
-            if (DependentPreferenceHelper.getPositionsInListsEnabled(itemProgressView.getContext())
-                    && item.getProgressMillis() > 0) {
+            if (item.getProgressMillis() > 0) {
                 itemProgressView.setVisibility(View.VISIBLE);
                 itemProgressView.setMax((int) item.getStreamEntity().getDuration());
                 itemProgressView.setProgress((int) TimeUnit.MILLISECONDS
@@ -143,8 +138,7 @@ public class LocalStatisticStreamItemHolder extends LocalItemHolder {
         }
         final StreamStatisticsEntry item = (StreamStatisticsEntry) localItem;
 
-        if (DependentPreferenceHelper.getPositionsInListsEnabled(itemProgressView.getContext())
-                && item.getProgressMillis() > 0 && item.getStreamEntity().getDuration() > 0) {
+        if (item.getProgressMillis() > 0 && item.getStreamEntity().getDuration() > 0) {
             itemProgressView.setMax((int) item.getStreamEntity().getDuration());
             if (itemProgressView.getVisibility() == View.VISIBLE) {
                 itemProgressView.setProgressAnimated((int) TimeUnit.MILLISECONDS

@@ -39,6 +39,7 @@
 
     <include
         android:id="@+id/playlist_control"
-        layout="@layout/playlist_control" />
+        layout="@layout/playlist_control"
+        android:visibility="gone" />
 
 </LinearLayout>
