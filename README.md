@@ -4,8 +4,7 @@
 
 <h1 align="center">Upipe</h1>
 
-
-Upipe is a beta fork of NewPipe 0.28.8 with Upipe branding, launcher icons, package identity, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
+Upipe is a beta Android streaming app with its own package identity, launcher icons, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
 
 ## Download Builds
 
@@ -13,7 +12,7 @@ Build hashes and the local APK build list are tracked at:
 
 https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
 
-The first beta build is `Beta v1.0.0`.
+The latest beta build is `Beta v1.0.1`.
 
 ## Contribute
 
@@ -29,4 +28,4 @@ Upipe is distributed under the GNU General Public License, version 3.0. See `LIC
 
 ## Attribution
 
-Upipe is based on NewPipe, a free and open source streaming frontend for Android. Upstream NewPipe code and documentation remain copyright their original authors and contributors.
+Upipe includes work from NewPipe, a free and open source streaming frontend for Android. Upstream NewPipe code and documentation remain copyright their original authors and contributors.
