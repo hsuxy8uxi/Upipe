@@ -17,7 +17,7 @@ Repository:
 https://github.com/hsuxy8uxi/Upipe
 
 ## About Upipe
-I forked NewPipe in July 2026 because of differences in how I want to carry out the idea of NewPipe's streaming platform, and have began working on the project independently since. Upipe does not recieve any updates from NewPipe, and problems that occur in NewPipe may not necessarily occur in Upipe.
+I forked NewPipe in July 2026 due to personal preferences, and have been working on the project independently since. Upipe does not recieve any updates from NewPipe, and problems that occur in NewPipe may not necessarily occur in Upipe. I do plan to add many features that weren't in the original, and to improve user experience.
 
 ## Download Builds
 
