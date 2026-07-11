@@ -1,4 +1,9 @@
-# Upipe
+<p align="center">
+  <img src="https://catbox.moe" alt="Upipe">
+</p>
+
+<h1 align="center">Upipe</h1>
+
 
 Upipe is a beta fork of NewPipe 0.28.8 with Upipe branding, launcher icons, package identity, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
 
