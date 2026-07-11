@@ -32,7 +32,7 @@ Build hashes and the local APK build list are tracked at:
 
 https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
 
-The latest beta build is `Beta v1.0.1`.
+The latest build is `v1.0.0`.
 
 ## License
 
