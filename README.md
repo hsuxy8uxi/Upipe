@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="https://catbox.moe" alt="Upipe">
+    <img src="assets/Upipe-icon-512-png" alt="Pipe Logo"></a>
 </p>
+
 
 <h1 align="center">Upipe</h1>
 
