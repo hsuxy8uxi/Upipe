@@ -5,15 +5,8 @@
 
 <h1 align="center">Upipe</h1>
 
-Upipe is a Android streaming app with its own package identity, launcher icons, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
+Upipe is a lightweight Android streaming app with its own package identity, launcher icons, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
 
-## Download Builds
-
-Build hashes and the local APK build list are tracked at:
-
-https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
-
-The latest beta build is `Beta v1.0.1`.
 
 ## Contribute
 
@@ -22,6 +15,17 @@ Upipe grows through testing, translations, design feedback, and code contributio
 Repository:
 
 https://github.com/hsuxy8uxi/Upipe
+
+## About Upipe
+I forked NewPipe in July 2026 because of differences in how I want to carry out the idea of NewPipe's streaming platform, and have began working on the project independently since. Upipe does not recieve any updates from NewPipe, and problems that occur in NewPipe may not necessarily occur in Upipe.
+
+## Download Builds
+
+Build hashes and the local APK build list are tracked at:
+
+https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
+
+The latest beta build is `Beta v1.0.1`.
 
 ## License
 
