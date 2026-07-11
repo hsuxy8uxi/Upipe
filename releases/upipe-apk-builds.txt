@@ -1,18 +1,8 @@
-Upipe APK builds
-Raw list: https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
-Generated: 2026-07-10 21:43:26 -04:00
+Upipe build artifacts
 
-Upipe-0.28.8-debug.apk
-  Size: 34723834 bytes
-  Built: 2026-07-10 16:06:48 -04:00
-  SHA256: 36c3ea197313a3612afec8c25a1d5043fc53c23c7abc00eda1bdde40b937845f
+v1.0.0
+APK: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.0.0/Upipe-v1.0.0.apk
+APK SHA-256: A7ED5812AE80C689BB31170F35C9DB2DB273879479CEA189A13910415D385303
+Source: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.0.0/Upipe-v1.0.0-source.zip
 
-Upipe-Beta-v1.0.0.apk
-  Size: 22075247 bytes
-  Built: 2026-07-10 21:12:01 -04:00
-  SHA256: a0867da0dd3b5e1942b50438912f536e66b844e949ac592113fde05e64072e3d
-
-Upipe-Beta-v1.0.1.apk
-  Size: 22080373 bytes
-  Built: 2026-07-10 21:42:21 -04:00
-  SHA256: eb1b7e874be1598d34eb088c02d3c92c60dfd7f31d53a44946f3636f7cf5737f
+Source note: v1.0.0 source includes the local NewPipeExtractor source tree under NewPipeExtractor/.

@@ -1,0 +1,1 @@
+Upipe ora migunakake pustaka kerangka kerja Google, utawa API Youtube. Upipe namung migunakake informasi situs kanggo njupuk informasi kang dibutuhake. Mula iku, Upipe isa digunakke ing piranti tanpa Layanan Google. Sampeyan uga ora mbutuhake akun Youtube kanggo migunakake Upipe, lan aplikasi iki FLOSS.
