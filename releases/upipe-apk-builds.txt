@@ -1,6 +1,6 @@
 Upipe APK builds
 Raw list: https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
-Generated: 2026-07-10 21:13:58 -04:00
+Generated: 2026-07-10 21:43:26 -04:00
 
 Upipe-0.28.8-debug.apk
   Size: 34723834 bytes
@@ -11,3 +11,8 @@ Upipe-Beta-v1.0.0.apk
   Size: 22075247 bytes
   Built: 2026-07-10 21:12:01 -04:00
   SHA256: a0867da0dd3b5e1942b50438912f536e66b844e949ac592113fde05e64072e3d
+
+Upipe-Beta-v1.0.1.apk
+  Size: 22080373 bytes
+  Built: 2026-07-10 21:42:21 -04:00
+  SHA256: eb1b7e874be1598d34eb088c02d3c92c60dfd7f31d53a44946f3636f7cf5737f
