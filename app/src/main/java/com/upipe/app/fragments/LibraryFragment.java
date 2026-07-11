@@ -1,18 +1,65 @@
 package com.upipe.app.fragments;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.EditText;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.upipe.app.BaseFragment;
+import com.upipe.app.NewPipeDatabase;
 import com.upipe.app.R;
+import com.upipe.app.database.history.model.StreamHistoryEntry;
+import com.upipe.app.database.playlist.PlaylistMetadataEntry;
+import com.upipe.app.database.stream.model.StreamEntity;
+import com.upipe.app.local.history.HistoryRecordManager;
+import com.upipe.app.local.playlist.LocalPlaylistManager;
+import com.upipe.app.local.subscription.SubscriptionManager;
+import com.upipe.app.util.Localization;
 import com.upipe.app.util.NavigationHelper;
+import com.upipe.app.util.image.CoilHelper;
+
+import java.util.Collections;
+import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public final class LibraryFragment extends BaseFragment {
+    private static final int PREVIEW_CARD_WIDTH_DP = 212;
+    private static final int MAX_PREVIEW_ITEMS = 10;
+
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    private LinearLayout historyPreview;
+    private LinearLayout playlistsPreview;
+    private TextView profileSummary;
+    private TextView historySummary;
+    private TextView playlistsSummary;
+    private TextView subscriptionsSummary;
+    private LocalPlaylistManager playlistManager;
+
+    private int subscriptionCount;
+    private int playlistCount;
+    private int recentVideoCount;
 
     @Nullable
     @Override
@@ -21,6 +68,26 @@ public final class LibraryFragment extends BaseFragment {
                              @Nullable final Bundle savedInstanceState) {
         setTitle(getString(R.string.tab_library));
         return inflater.inflate(R.layout.fragment_library, container, false);
+    }
+
+    @Override
+    protected void initViews(final View rootView, final Bundle savedInstanceState) {
+        super.initViews(rootView, savedInstanceState);
+
+        historyPreview = rootView.findViewById(R.id.library_history_preview);
+        playlistsPreview = rootView.findViewById(R.id.library_playlists_preview);
+        profileSummary = rootView.findViewById(R.id.library_profile_summary);
+        historySummary = rootView.findViewById(R.id.library_history_summary_text);
+        playlistsSummary = rootView.findViewById(R.id.library_playlists_summary_text);
+        subscriptionsSummary = rootView.findViewById(R.id.library_subscriptions_summary_text);
+        playlistManager = new LocalPlaylistManager(NewPipeDatabase.getInstance(requireContext()));
+
+        keepPagerFromStealingHorizontalScroll(
+                rootView.findViewById(R.id.library_history_scroller));
+        keepPagerFromStealingHorizontalScroll(
+                rootView.findViewById(R.id.library_playlists_scroller));
+
+        subscribeToLibraryData();
     }
 
     @Override
@@ -41,5 +108,292 @@ public final class LibraryFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         setTitle(getString(R.string.tab_library));
+    }
+
+    @Override
+    public void onDestroyView() {
+        disposables.clear();
+        historyPreview = null;
+        playlistsPreview = null;
+        profileSummary = null;
+        historySummary = null;
+        playlistsSummary = null;
+        subscriptionsSummary = null;
+        playlistManager = null;
+        super.onDestroyView();
+    }
+
+    private void subscribeToLibraryData() {
+        final HistoryRecordManager historyRecordManager =
+                new HistoryRecordManager(requireContext());
+        final SubscriptionManager subscriptionManager = new SubscriptionManager(requireContext());
+
+        disposables.add(historyRecordManager.getStreamHistory()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::renderHistoryPreview,
+                        throwable -> renderHistoryPreview(Collections.emptyList())));
+
+        disposables.add(playlistManager.getPlaylists()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::renderPlaylistsPreview,
+                        throwable -> renderPlaylistsPreview(Collections.emptyList())));
+
+        disposables.add(subscriptionManager.subscriptions()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriptions -> {
+                    subscriptionCount = subscriptions.size();
+                    if (subscriptionsSummary != null) {
+                        subscriptionsSummary.setText(getResources().getQuantityString(
+                                R.plurals.library_subscriptions_count,
+                                subscriptionCount,
+                                subscriptionCount));
+                    }
+                    updateProfileSummary();
+                }, throwable -> {
+                    subscriptionCount = 0;
+                    updateProfileSummary();
+                }));
+    }
+
+    private void renderHistoryPreview(final List<StreamHistoryEntry> history) {
+        if (!isAdded() || historyPreview == null || historySummary == null) {
+            return;
+        }
+
+        historyPreview.removeAllViews();
+        recentVideoCount = history.size();
+        historySummary.setText(getResources().getQuantityString(
+                R.plurals.library_recent_videos_count,
+                recentVideoCount,
+                recentVideoCount));
+
+        if (history.isEmpty()) {
+            historyPreview.addView(createEmptyCard(R.drawable.ic_history,
+                    getString(R.string.library_empty_history),
+                    getString(R.string.library_empty_history_summary),
+                    () -> NavigationHelper.openStatisticFragment(getFM())));
+        } else {
+            final int previewCount = Math.min(history.size(), MAX_PREVIEW_ITEMS);
+            for (int i = 0; i < previewCount; i++) {
+                historyPreview.addView(createHistoryCard(history.get(i)));
+            }
+        }
+
+        updateProfileSummary();
+    }
+
+    private void renderPlaylistsPreview(final List<PlaylistMetadataEntry> playlists) {
+        if (!isAdded() || playlistsPreview == null || playlistsSummary == null) {
+            return;
+        }
+
+        playlistsPreview.removeAllViews();
+        playlistCount = playlists.size();
+        playlistsSummary.setText(getResources().getQuantityString(
+                R.plurals.library_playlists_count,
+                playlistCount,
+                playlistCount));
+
+        if (playlists.isEmpty()) {
+            playlistsPreview.addView(createEmptyCard(R.drawable.ic_add,
+                    getString(R.string.library_empty_playlists),
+                    getString(R.string.library_empty_playlists_summary),
+                    this::showCreatePlaylistDialog));
+        } else {
+            final int previewCount = Math.min(playlists.size(), MAX_PREVIEW_ITEMS);
+            for (int i = 0; i < previewCount; i++) {
+                playlistsPreview.addView(createPlaylistCard(playlists.get(i)));
+            }
+        }
+
+        updateProfileSummary();
+    }
+
+    private View createHistoryCard(final StreamHistoryEntry entry) {
+        final View card = LayoutInflater.from(requireContext())
+                .inflate(R.layout.list_stream_card_item, historyPreview, false);
+        card.setLayoutParams(previewCardLayoutParams());
+
+        final StreamEntity stream = entry.getStreamEntity();
+        final ImageView thumbnail = card.findViewById(R.id.itemThumbnailView);
+        final TextView title = card.findViewById(R.id.itemVideoTitleView);
+        final TextView uploader = card.findViewById(R.id.itemUploaderView);
+        final TextView duration = card.findViewById(R.id.itemDurationView);
+        final TextView additionalDetails = card.findViewById(R.id.itemAdditionalDetails);
+        final View progress = card.findViewById(R.id.itemProgressView);
+
+        title.setText(stream.getTitle());
+        uploader.setText(stream.getUploader());
+        if (additionalDetails != null) {
+            additionalDetails.setText(Localization.relativeTime(entry.getAccessDate()));
+        }
+        if (stream.getDuration() > 0) {
+            duration.setText(Localization.getDurationString(stream.getDuration()));
+            duration.setVisibility(View.VISIBLE);
+        } else {
+            duration.setVisibility(View.GONE);
+        }
+        if (progress != null) {
+            progress.setVisibility(View.GONE);
+        }
+
+        CoilHelper.INSTANCE.loadThumbnail(thumbnail, stream.getThumbnailUrl());
+        card.setOnClickListener(v -> NavigationHelper.openVideoDetailFragment(requireContext(),
+                getFM(), stream.getServiceId(), stream.getUrl(), stream.getTitle(), null, false));
+        return card;
+    }
+
+    private View createPlaylistCard(final PlaylistMetadataEntry playlist) {
+        final View card = LayoutInflater.from(requireContext())
+                .inflate(R.layout.list_playlist_card_item, playlistsPreview, false);
+        card.setLayoutParams(previewCardLayoutParams());
+
+        final ImageView thumbnail = card.findViewById(R.id.itemThumbnailView);
+        final TextView title = card.findViewById(R.id.itemTitleView);
+        final TextView streamCount = card.findViewById(R.id.itemStreamCountView);
+        final TextView uploader = card.findViewById(R.id.itemUploaderView);
+
+        final String playlistName = TextUtils.isEmpty(playlist.getOrderingName())
+                ? getString(R.string.unknown_content)
+                : playlist.getOrderingName();
+        title.setText(playlistName);
+        streamCount.setText(Localization.localizeStreamCountMini(requireContext(),
+                playlist.getStreamCount()));
+        uploader.setText(Localization.localizeStreamCount(requireContext(),
+                playlist.getStreamCount()));
+
+        CoilHelper.INSTANCE.loadPlaylistThumbnail(thumbnail, playlist.getThumbnailUrl());
+        card.setOnClickListener(v -> NavigationHelper.openLocalPlaylistFragment(getFM(),
+                playlist.getUid(), playlistName));
+        return card;
+    }
+
+    private View createEmptyCard(@DrawableRes final int iconRes,
+                                 final String titleText,
+                                 final String summaryText,
+                                 final Runnable clickAction) {
+        final LinearLayout card = new LinearLayout(requireContext());
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER);
+        card.setPadding(dp(16), dp(14), dp(16), dp(14));
+        card.setMinimumHeight(dp(132));
+        card.setLayoutParams(previewCardLayoutParams());
+        card.setClickable(true);
+        card.setFocusable(true);
+        applySelectableItemBackground(card);
+        card.setOnClickListener(v -> clickAction.run());
+
+        final ImageView icon = new ImageView(requireContext());
+        icon.setImageResource(iconRes);
+        icon.setContentDescription(titleText);
+        final LinearLayout.LayoutParams iconParams =
+                new LinearLayout.LayoutParams(dp(36), dp(36));
+        card.addView(icon, iconParams);
+
+        final TextView title = new TextView(requireContext());
+        title.setText(titleText);
+        title.setGravity(Gravity.CENTER);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setMaxLines(2);
+        title.setEllipsize(TextUtils.TruncateAt.END);
+        title.setPadding(0, dp(10), 0, 0);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        card.addView(title, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        final TextView summary = new TextView(requireContext());
+        summary.setText(summaryText);
+        summary.setGravity(Gravity.CENTER);
+        summary.setMaxLines(3);
+        summary.setEllipsize(TextUtils.TruncateAt.END);
+        summary.setPadding(0, dp(4), 0, 0);
+        summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        card.addView(summary, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        return card;
+    }
+
+    private LinearLayout.LayoutParams previewCardLayoutParams() {
+        final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                dp(PREVIEW_CARD_WIDTH_DP), ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMarginEnd(dp(12));
+        return params;
+    }
+
+    private void showCreatePlaylistDialog() {
+        if (playlistManager == null) {
+            return;
+        }
+
+        final EditText editText = new EditText(requireContext());
+        editText.setHint(R.string.name);
+        editText.setSingleLine(true);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        editText.setPadding(dp(24), dp(8), dp(24), dp(8));
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.create_playlist)
+                .setView(editText)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.create, (dialog, which) -> {
+                    final String name = editText.getText().toString().trim();
+                    if (TextUtils.isEmpty(name) || playlistManager == null) {
+                        return;
+                    }
+
+                    disposables.add(playlistManager.createEmptyPlaylist(name)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(ignored -> Toast.makeText(requireContext(),
+                                            R.string.playlist_creation_success,
+                                            Toast.LENGTH_SHORT).show(),
+                                    throwable -> Toast.makeText(requireContext(),
+                                            R.string.general_error,
+                                            Toast.LENGTH_SHORT).show()));
+                })
+                .show();
+    }
+
+    private void updateProfileSummary() {
+        if (profileSummary != null) {
+            profileSummary.setText(getString(R.string.library_profile_summary,
+                    subscriptionCount, playlistCount, recentVideoCount));
+        }
+    }
+
+    private void keepPagerFromStealingHorizontalScroll(final HorizontalScrollView scrollView) {
+        if (scrollView == null) {
+            return;
+        }
+
+        scrollView.setOnTouchListener((view, event) -> {
+            final boolean disallow = event.getActionMasked() != MotionEvent.ACTION_UP
+                    && event.getActionMasked() != MotionEvent.ACTION_CANCEL;
+            requestDisallowParentIntercept(view, disallow);
+            return false;
+        });
+    }
+
+    private void requestDisallowParentIntercept(final View view, final boolean disallow) {
+        ViewParent parent = view.getParent();
+        while (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(disallow);
+            parent = parent.getParent();
+        }
+    }
+
+    private void applySelectableItemBackground(final View view) {
+        final TypedValue outValue = new TypedValue();
+        requireContext().getTheme().resolveAttribute(
+                android.R.attr.selectableItemBackground, outValue, true);
+        if (outValue.resourceId != 0) {
+            view.setBackgroundResource(outValue.resourceId);
+        }
+    }
+
+    private int dp(final int value) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value,
+                getResources().getDisplayMetrics());
     }
 }

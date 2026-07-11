@@ -482,6 +482,13 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            hideKeyboardSearch();
+            hideSuggestionsPanel();
+            NavigationHelper.gotoMainFragment(getFM());
+            return true;
+        }
+
         final var filter = Collections.singletonList(menuItemToFilterName.get(item.getItemId()));
         changeContentFilter(item, filter);
         return true;
@@ -728,6 +735,7 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
             searchEditText.setText(lastSearchedString);
             return true;
         }
+        hideKeyboardSearch();
         return false;
     }
 

@@ -21,7 +21,6 @@ import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import com.upipe.app.fragments.BlankFragment;
 import com.upipe.app.fragments.HomeFragment;
 import com.upipe.app.fragments.LibraryFragment;
-import com.upipe.app.fragments.SettingsRootFragment;
 import com.upipe.app.fragments.list.channel.ChannelFragment;
 import com.upipe.app.fragments.list.kiosk.DefaultKioskFragment;
 import com.upipe.app.fragments.list.kiosk.KioskFragment;
@@ -286,8 +285,8 @@ public abstract class Tab {
         }
 
         @Override
-        public SettingsRootFragment getFragment(final Context context) {
-            return new SettingsRootFragment();
+        public BlankFragment getFragment(final Context context) {
+            return new BlankFragment();
         }
     }
 

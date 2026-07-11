@@ -9,82 +9,48 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingLeft="16dp"
-        android:paddingTop="20dp"
+        android:paddingTop="16dp"
         android:paddingRight="16dp"
         android:paddingBottom="24dp">
 
         <LinearLayout
-            android:id="@+id/library_subscriptions"
+            android:id="@+id/library_profile"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:background="?attr/selectableItemBackground"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingLeft="8dp"
-            android:paddingRight="8dp">
+            android:paddingTop="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="16dp">
 
             <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:contentDescription="@string/tab_subscriptions"
-                android:src="@drawable/ic_subscriptions" />
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:contentDescription="@string/library_profile_title"
+                android:padding="12dp"
+                android:src="@drawable/ic_person" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="18dp"
+                android:layout_marginLeft="16dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <com.upipe.app.views.NewPipeTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/tab_subscriptions"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                    android:text="@string/library_profile_title"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textStyle="bold" />
 
                 <com.upipe.app.views.NewPipeTextView
+                    android:id="@+id/library_profile_summary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="@string/library_subscriptions_summary"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/library_playlists"
-            android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp">
-
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:contentDescription="@string/tab_bookmarks_short"
-                android:src="@drawable/ic_playlist_play" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="18dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <com.upipe.app.views.NewPipeTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tab_bookmarks_short"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <com.upipe.app.views.NewPipeTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="@string/library_playlists_summary"
+                    android:text="@string/library_profile_summary_empty"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
         </LinearLayout>
@@ -92,7 +58,7 @@
         <LinearLayout
             android:id="@+id/library_history"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
+            android:layout_height="64dp"
             android:background="?attr/selectableItemBackground"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -119,6 +85,7 @@
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <com.upipe.app.views.NewPipeTextView
+                    android:id="@+id/library_history_summary_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
@@ -127,10 +94,122 @@
             </LinearLayout>
         </LinearLayout>
 
+        <HorizontalScrollView
+            android:id="@+id/library_history_scroller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingBottom="12dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/library_history_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/library_playlists"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:contentDescription="@string/tab_bookmarks_short"
+                android:src="@drawable/ic_playlist_play" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="18dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.upipe.app.views.NewPipeTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tab_bookmarks_short"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <com.upipe.app.views.NewPipeTextView
+                    android:id="@+id/library_playlists_summary_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/library_playlists_summary"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/library_playlists_scroller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingBottom="12dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/library_playlists_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/library_subscriptions"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:contentDescription="@string/tab_subscriptions"
+                android:src="@drawable/ic_subscriptions" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="18dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.upipe.app.views.NewPipeTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tab_subscriptions"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <com.upipe.app.views.NewPipeTextView
+                    android:id="@+id/library_subscriptions_summary_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/library_subscriptions_summary"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/library_about"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
+            android:layout_height="64dp"
             android:background="?attr/selectableItemBackground"
             android:gravity="center_vertical"
             android:orientation="horizontal"

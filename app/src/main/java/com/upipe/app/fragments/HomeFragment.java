@@ -20,6 +20,23 @@ import com.upipe.app.fragments.list.kiosk.FilteredKioskFragment;
 public class HomeFragment extends BaseFragment {
     private TabLayout tabLayout;
     private androidx.viewpager.widget.ViewPager viewPager;
+    private final TabLayout.OnTabSelectedListener tabSelectedListener =
+            new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(final TabLayout.Tab tab) {
+                    updateTitleForPage(tab.getPosition());
+                }
+
+                @Override
+                public void onTabUnselected(final TabLayout.Tab tab) {
+                    // No-op
+                }
+
+                @Override
+                public void onTabReselected(final TabLayout.Tab tab) {
+                    updateTitleForPage(tab.getPosition());
+                }
+            };
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
@@ -37,16 +54,50 @@ public class HomeFragment extends BaseFragment {
         viewPager.setAdapter(new HomePagerAdapter(getChildFragmentManager()));
         viewPager.setOffscreenPageLimit(1);
         tabLayout.setupWithViewPager(viewPager);
+        setupIconTabs();
+        tabLayout.addOnTabSelectedListener(tabSelectedListener);
+        updateTitleForPage(viewPager.getCurrentItem());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewPager != null) {
+            updateTitleForPage(viewPager.getCurrentItem());
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (tabLayout != null) {
+            tabLayout.removeOnTabSelectedListener(tabSelectedListener);
+        }
         if (viewPager != null) {
             viewPager.setAdapter(null);
         }
         viewPager = null;
         tabLayout = null;
+    }
+
+    private void setupIconTabs() {
+        setupIconTab(0, R.drawable.ic_home, R.string.tab_home);
+        setupIconTab(1, R.drawable.ic_live_tv, R.string.home_live_tab);
+    }
+
+    private void setupIconTab(final int position, final int iconRes, final int descriptionRes) {
+        final TabLayout.Tab tab = tabLayout.getTabAt(position);
+        if (tab == null) {
+            return;
+        }
+
+        tab.setText(null);
+        tab.setIcon(iconRes);
+        tab.setContentDescription(getString(descriptionRes));
+    }
+
+    private void updateTitleForPage(final int position) {
+        setTitle(getString(position == 1 ? R.string.home_live_tab : R.string.tab_home));
     }
 
     private final class HomePagerAdapter extends FragmentPagerAdapter {
@@ -72,9 +123,7 @@ public class HomeFragment extends BaseFragment {
         @Nullable
         @Override
         public CharSequence getPageTitle(final int position) {
-            return position == 1
-                    ? getString(R.string.home_live_tab)
-                    : getString(R.string.tab_home);
+            return null;
         }
     }
 }

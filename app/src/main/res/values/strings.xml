@@ -43,6 +43,25 @@
     <string name="library_playlists_summary">Saved and local playlists</string>
     <string name="library_history_summary">Watch history and recently played streams</string>
     <string name="library_about_summary">App info, copyright, and licenses</string>
+    <string name="library_profile_title">You</string>
+    <string name="library_profile_summary_empty">History / playlists / subscriptions</string>
+    <string name="library_profile_summary">%1$d subscriptions / %2$d playlists / %3$d recent videos</string>
+    <string name="library_empty_history">No watched videos yet</string>
+    <string name="library_empty_history_summary">Watched videos will appear here.</string>
+    <string name="library_empty_playlists">Add a playlist</string>
+    <string name="library_empty_playlists_summary">Open playlists to start saving videos.</string>
+    <plurals name="library_subscriptions_count">
+        <item quantity="one">%d subscription</item>
+        <item quantity="other">%d subscriptions</item>
+    </plurals>
+    <plurals name="library_playlists_count">
+        <item quantity="one">%d playlist</item>
+        <item quantity="other">%d playlists</item>
+    </plurals>
+    <plurals name="library_recent_videos_count">
+        <item quantity="one">%d recent video</item>
+        <item quantity="other">%d recent videos</item>
+    </plurals>
     <string name="settings_tab_summary">Adjust playback, downloads, appearance, privacy, and app behavior.</string>
     <string name="open_settings">Open settings</string>
     <string name="tab_choose">Choose Tab</string>

@@ -11,6 +11,7 @@
         android:layout_alignParentTop="true"
         android:background="?attr/colorPrimary"
         app:tabGravity="fill"
+        app:tabIconTint="@color/white"
         app:tabIndicatorColor="@color/white"
         app:tabMode="fixed"
         app:tabRippleColor="@color/white"

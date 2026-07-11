@@ -63,6 +63,7 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
     private boolean youtubeRestrictedModeEnabled;
     private String youtubeRestrictedModeEnabledKey;
     private boolean mainTabsPositionBottom;
+    private int lastNonSettingsTabPosition = 0;
 
     /*//////////////////////////////////////////////////////////////////////////
     // Fragment's LifeCycle
@@ -196,7 +197,11 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
         binding.pager.setOffscreenPageLimit(Math.max(1, tabsList.size() - 1));
 
         updateTabsIconAndDescription();
-        updateTitleForTab(binding.pager.getCurrentItem());
+        final int currentPosition = binding.pager.getCurrentItem();
+        if (!isSettingsTab(currentPosition)) {
+            lastNonSettingsTabPosition = currentPosition;
+            updateTitleForTab(currentPosition);
+        }
 
         hasTabsChanged = false;
     }
@@ -214,6 +219,12 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
 
     private void updateTitleForTab(final int tabPosition) {
         setTitle(tabsList.get(tabPosition).getTabName(requireContext()));
+    }
+
+    private boolean isSettingsTab(final int tabPosition) {
+        return tabPosition >= 0
+                && tabPosition < tabsList.size()
+                && tabsList.get(tabPosition) instanceof Tab.SettingsTab;
     }
 
     public void commitPlaylistTabs() {
@@ -260,8 +271,11 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
         if (DEBUG) {
             Log.d(TAG, "onTabSelected() called with: selectedTab = [" + selectedTab + "]");
         }
+        if (openTabActionIfNeeded(selectedTab)) {
+            return;
+        }
+        lastNonSettingsTabPosition = selectedTab.getPosition();
         updateTitleForTab(selectedTab.getPosition());
-        openTabActionIfNeeded(selectedTab);
     }
 
     @Override
@@ -272,18 +286,27 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
         if (DEBUG) {
             Log.d(TAG, "onTabReselected() called with: tab = [" + tab + "]");
         }
+        if (openTabActionIfNeeded(tab)) {
+            return;
+        }
+        lastNonSettingsTabPosition = tab.getPosition();
         updateTitleForTab(tab.getPosition());
-        openTabActionIfNeeded(tab);
     }
 
-    private void openTabActionIfNeeded(final TabLayout.Tab tab) {
+    private boolean openTabActionIfNeeded(final TabLayout.Tab tab) {
         if (tab == null || tab.getPosition() < 0 || tab.getPosition() >= tabsList.size()) {
-            return;
+            return false;
         }
 
         if (tabsList.get(tab.getPosition()) instanceof Tab.SettingsTab) {
             NavigationHelper.openSettings(requireContext());
+            final int restoredPosition = Math.min(lastNonSettingsTabPosition,
+                    Math.max(0, tabsList.size() - 1));
+            binding.pager.post(() -> binding.pager.setCurrentItem(restoredPosition, false));
+            return true;
         }
+
+        return false;
     }
 
     public static final class SelectedTabsPagerAdapter
