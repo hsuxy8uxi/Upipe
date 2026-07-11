@@ -5,4 +5,4 @@ APK: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.0.0/Upipe-v1.0.0.ap
 APK SHA-256: A7ED5812AE80C689BB31170F35C9DB2DB273879479CEA189A13910415D385303
 Source: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.0.0/Upipe-v1.0.0-source.zip
 
-Source note: v1.0.0 source includes the local NewPipeExtractor source tree under NewPipeExtractor/.
+Source note: v1.0.0 source includes the local NewPipeExtractor source tree under UpipeExtractor/.

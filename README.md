@@ -17,7 +17,7 @@ I forked NewPipe in July 2026 due to personal preferences, and have been working
 
 ## Extractor Source
 
-Upipe includes a local source copy of NewPipeExtractor in `NewPipeExtractor/`. Upipe builds use that local extractor through Gradle included-build dependency substitution, so extractor patches are part of the public source and are licensed under GPL-3.0-or-later with the upstream NewPipeExtractor notices preserved.
+Upipe includes a local source copy of NewPipeExtractor in `UpipeExtractor/`. Upipe builds use that local extractor through Gradle included-build dependency substitution, so extractor patches are part of the public source and are licensed under GPL-3.0-or-later with the upstream NewPipeExtractor notices preserved.
 
 ## Features
 * Improved interface with bottom, not top, navigation

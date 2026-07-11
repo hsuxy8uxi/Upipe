@@ -26,7 +26,7 @@ rootProject.name = "Upipe"
 
 include (":app")
 
-includeBuild("NewPipeExtractor") {
+includeBuild("UpipeExtractor") {
     dependencySubstitution {
         substitute(module("com.github.TeamNewPipe:NewPipeExtractor"))
             .using(project(":extractor"))
