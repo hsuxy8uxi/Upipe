@@ -15,6 +15,10 @@ Upipe grows through testing, translations, design feedback, and code contributio
 ## About Upipe
 I forked NewPipe in July 2026 due to personal preferences, and have been working on the project independently since. Upipe does not recieve any updates from NewPipe, and problems that occur in NewPipe may not necessarily occur in Upipe. I do plan to add many features that weren't in the original, and to improve user experience.
 
+## Extractor Source
+
+Upipe includes a local source copy of NewPipeExtractor in `NewPipeExtractor/`. Upipe builds use that local extractor through Gradle included-build dependency substitution, so extractor patches are part of the public source and are licensed under GPL-3.0-or-later with the upstream NewPipeExtractor notices preserved.
+
 ## Features
 * Improved interface with bottom, not top, navigation
 * Removed trending tabs
