@@ -1,1 +1,0 @@
-Upipe sama sekali tidak menggunakan pustaka kerangka kerja Google, atau layanan API YouTube. Upipe hanya mengunakan informasi situs YouTube untuk mendapatkan informasi yang dibutuhkan. Oleh karena itu, Upipe bisa digunakan pada perangkat tanpa Layanan Google. Anda juga tidak membutuhkan akun YouTube untuk menggunakan Upipe, dan aplikasi ini sepenuhnya FLOSS.
