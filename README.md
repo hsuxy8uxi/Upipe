@@ -12,10 +12,6 @@ Upipe is a lightweight Android streaming app with its own package identity, laun
 
 Upipe grows through testing, translations, design feedback, and code contributions. Open issues, share fixes, or suggest improvements on GitHub. Every useful report or pull request helps make the app cleaner and easier to use.
 
-Repository:
-
-https://github.com/hsuxy8uxi/Upipe
-
 ## About Upipe
 I forked NewPipe in July 2026 due to personal preferences, and have been working on the project independently since. Upipe does not recieve any updates from NewPipe, and problems that occur in NewPipe may not necessarily occur in Upipe. I do plan to add many features that weren't in the original, and to improve user experience.
 
