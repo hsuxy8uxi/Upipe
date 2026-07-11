@@ -1,11 +1,11 @@
 <p align="center">
-    <img src="assets/Upipe-icon-512-png" alt="Pipe Logo"></a>
+    <img src="assets/Upipe-icon-512.png" width="150" height="150" alt="Logo">
 </p>
 
 
 <h1 align="center">Upipe</h1>
 
-Upipe is a beta Android streaming app with its own package identity, launcher icons, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
+Upipe is a Android streaming app with its own package identity, launcher icons, and About/Licenses screens. The current Android application ID is `com.upipe.app`.
 
 ## Download Builds
 
