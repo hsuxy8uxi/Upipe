@@ -1,8 +1,27 @@
 Upipe build artifacts
+Raw list: https://raw.githubusercontent.com/hsuxy8uxi/Upipe/main/releases/upipe-apk-builds.txt
+Generated: 2026-07-12
 
 v1.0.0
 APK: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.0.0/Upipe-v1.0.0.apk
 APK SHA-256: A7ED5812AE80C689BB31170F35C9DB2DB273879479CEA189A13910415D385303
 Source: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.0.0/Upipe-v1.0.0-source.zip
+Source SHA-256: 34B344E11EB68812ED06950563768A9945EC21AF0D72048293DE1CEC8249D3B5
 
-Source note: v1.0.0 source includes the local NewPipeExtractor source tree under UpipeExtractor/.
+v1.1.0
+APK: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.1.0/Upipe-v1.1.0-release-signed.apk
+APK SHA-256: F3660BC1FDA60D5270A24632F22EE747C96999B9C5A37B5F2680BE10D67E3722
+Source: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.1.0/Upipe-v1.1.0-source.zip
+Source SHA-256: F9C54F016AA7F3F5867D6F4180C25EF48B3F80FFCFD636C1853DACA2290002B1
+
+v1.2.0
+APK: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.2.0/Upipe-v1.2.0-release-signed.apk
+APK SHA-256: 8F62BB70D05D2D5F6D5C2FCB167CC79A6BFC09613DD76F4A5949C281F68B2A20
+Source: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.2.0/Upipe-v1.2.0-source.zip
+Source SHA-256: 178DE9308EC27D30477C321A78E1D84590D278C9FD29CFFC58E116BC482F99A9
+
+v1.2.6
+APK: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.2.6/Upipe-v1.2.6-release-signed.apk
+APK SHA-256: DC84A3E75280BBED8D8133D919BC6CC060BB4E0609CC1FDF553921A6F87DF18D
+Source: https://github.com/hsuxy8uxi/Upipe/releases/download/v1.2.6/Upipe-v1.2.6-source.zip
+Source SHA-256: A89E846AFB944A857E907E7BC6A61A0D2C8B039580537990585749B95BBC617B
