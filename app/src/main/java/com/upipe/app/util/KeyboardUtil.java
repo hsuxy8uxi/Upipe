@@ -1,6 +1,7 @@
 package com.upipe.app.util;
 
 import android.app.Activity;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
@@ -45,11 +46,19 @@ public final class KeyboardUtil {
             return;
         }
 
+        editText.clearFocus();
+        final View focusedView = activity.getCurrentFocus();
+        if (focusedView != null) {
+            focusedView.clearFocus();
+        }
+
         final InputMethodManager imm = ContextCompat.getSystemService(activity,
                 InputMethodManager.class);
-        imm.hideSoftInputFromWindow(editText.getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 
-        editText.clearFocus();
+        final View decorView = activity.getWindow().getDecorView();
+        if (decorView != null && decorView.getWindowToken() != null) {
+            imm.hideSoftInputFromWindow(decorView.getWindowToken(), 0);
+        }
     }
 }

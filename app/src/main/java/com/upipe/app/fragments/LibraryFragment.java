@@ -1,5 +1,7 @@
 package com.upipe.app.fragments;
 
+import static com.upipe.app.local.bookmark.MergedPlaylistManager.getMergedOrderedPlaylists;
+
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -27,11 +29,15 @@ import androidx.appcompat.app.AlertDialog;
 import com.upipe.app.BaseFragment;
 import com.upipe.app.NewPipeDatabase;
 import com.upipe.app.R;
+import com.upipe.app.database.AppDatabase;
+import com.upipe.app.database.playlist.PlaylistLocalItem;
 import com.upipe.app.database.playlist.PlaylistMetadataEntry;
+import com.upipe.app.database.playlist.model.PlaylistRemoteEntity;
 import com.upipe.app.database.stream.StreamStatisticsEntry;
 import com.upipe.app.database.stream.model.StreamEntity;
 import com.upipe.app.local.history.HistoryRecordManager;
 import com.upipe.app.local.playlist.LocalPlaylistManager;
+import com.upipe.app.local.playlist.RemotePlaylistManager;
 import com.upipe.app.local.subscription.SubscriptionManager;
 import com.upipe.app.util.Localization;
 import com.upipe.app.util.NavigationHelper;
@@ -61,6 +67,7 @@ public final class LibraryFragment extends BaseFragment {
     private TextView playlistsSummary;
     private TextView subscriptionsSummary;
     private LocalPlaylistManager playlistManager;
+    private RemotePlaylistManager remotePlaylistManager;
 
     private int subscriptionCount;
     private int playlistCount;
@@ -84,14 +91,14 @@ public final class LibraryFragment extends BaseFragment {
         historySummary = rootView.findViewById(R.id.library_history_summary_text);
         playlistsSummary = rootView.findViewById(R.id.library_playlists_summary_text);
         subscriptionsSummary = rootView.findViewById(R.id.library_subscriptions_summary_text);
-        playlistManager = new LocalPlaylistManager(NewPipeDatabase.getInstance(requireContext()));
+        final AppDatabase database = NewPipeDatabase.getInstance(requireContext());
+        playlistManager = new LocalPlaylistManager(database);
+        remotePlaylistManager = new RemotePlaylistManager(database);
 
         keepPagerFromStealingHorizontalScroll(
                 rootView.findViewById(R.id.library_history_scroller));
         keepPagerFromStealingHorizontalScroll(
                 rootView.findViewById(R.id.library_playlists_scroller));
-        keepPagerFromStealingHorizontalScroll(historyPreview);
-        keepPagerFromStealingHorizontalScroll(playlistsPreview);
 
         subscribeToLibraryData();
     }
@@ -124,6 +131,7 @@ public final class LibraryFragment extends BaseFragment {
         playlistsSummary = null;
         subscriptionsSummary = null;
         playlistManager = null;
+        remotePlaylistManager = null;
         super.onDestroyView();
     }
 
@@ -137,7 +145,7 @@ public final class LibraryFragment extends BaseFragment {
                 .subscribe(this::renderHistoryPreview,
                         throwable -> renderHistoryPreview(Collections.emptyList())));
 
-        disposables.add(playlistManager.getPlaylists()
+        disposables.add(getMergedOrderedPlaylists(playlistManager, remotePlaylistManager)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::renderPlaylistsPreview,
                         throwable -> renderPlaylistsPreview(Collections.emptyList())));
@@ -194,7 +202,7 @@ public final class LibraryFragment extends BaseFragment {
         updateProfileSummary();
     }
 
-    private void renderPlaylistsPreview(final List<PlaylistMetadataEntry> playlists) {
+    private void renderPlaylistsPreview(final List<PlaylistLocalItem> playlists) {
         if (!isAdded() || playlistsPreview == null || playlistsSummary == null) {
             return;
         }
@@ -216,6 +224,10 @@ public final class LibraryFragment extends BaseFragment {
             for (int i = 0; i < previewCount; i++) {
                 playlistsPreview.addView(createPlaylistCard(playlists.get(i)));
             }
+            playlistsPreview.addView(createEmptyCard(R.drawable.ic_add,
+                    getString(R.string.create_playlist),
+                    getString(R.string.library_create_playlist_summary),
+                    this::showCreatePlaylistDialog));
         }
 
         updateProfileSummary();
@@ -225,7 +237,6 @@ public final class LibraryFragment extends BaseFragment {
         final View card = LayoutInflater.from(requireContext())
                 .inflate(R.layout.list_stream_card_item, historyPreview, false);
         card.setLayoutParams(previewCardLayoutParams());
-        keepPagerFromStealingHorizontalScroll(card);
 
         final StreamEntity stream = entry.getStreamEntity();
         final ImageView thumbnail = card.findViewById(R.id.itemThumbnailView);
@@ -238,7 +249,7 @@ public final class LibraryFragment extends BaseFragment {
         title.setText(stream.getTitle());
         uploader.setText(stream.getUploader());
         if (additionalDetails != null) {
-            additionalDetails.setText(Localization.relativeTime(entry.getLatestAccessDate()));
+            additionalDetails.setVisibility(View.GONE);
         }
         if (stream.getDuration() > 0) {
             duration.setText(Localization.getDurationString(stream.getDuration()));
@@ -263,11 +274,10 @@ public final class LibraryFragment extends BaseFragment {
         return card;
     }
 
-    private View createPlaylistCard(final PlaylistMetadataEntry playlist) {
+    private View createPlaylistCard(final PlaylistLocalItem playlist) {
         final View card = LayoutInflater.from(requireContext())
                 .inflate(R.layout.list_playlist_card_item, playlistsPreview, false);
         card.setLayoutParams(previewCardLayoutParams());
-        keepPagerFromStealingHorizontalScroll(card);
 
         final ImageView thumbnail = card.findViewById(R.id.itemThumbnailView);
         final TextView title = card.findViewById(R.id.itemTitleView);
@@ -278,14 +288,31 @@ public final class LibraryFragment extends BaseFragment {
                 ? getString(R.string.unknown_content)
                 : playlist.getOrderingName();
         title.setText(playlistName);
-        streamCount.setText(Localization.localizeStreamCountMini(requireContext(),
-                playlist.getStreamCount()));
-        uploader.setText(Localization.localizeStreamCount(requireContext(),
-                playlist.getStreamCount()));
+
+        if (playlist instanceof PlaylistMetadataEntry) {
+            final PlaylistMetadataEntry localPlaylist = (PlaylistMetadataEntry) playlist;
+            streamCount.setText(Localization.localizeStreamCountMini(requireContext(),
+                    localPlaylist.getStreamCount()));
+            uploader.setText(Localization.localizeStreamCount(requireContext(),
+                    localPlaylist.getStreamCount()));
+            card.setOnClickListener(v -> NavigationHelper.openLocalPlaylistFragment(getFM(),
+                    localPlaylist.getUid(), playlistName));
+        } else if (playlist instanceof PlaylistRemoteEntity) {
+            final PlaylistRemoteEntity remotePlaylist = (PlaylistRemoteEntity) playlist;
+            final Long remoteStreamCount = remotePlaylist.getStreamCount();
+            streamCount.setText(remoteStreamCount == null
+                    ? ""
+                    : Localization.localizeStreamCountMini(requireContext(), remoteStreamCount));
+            uploader.setText(TextUtils.isEmpty(remotePlaylist.getUploader())
+                    ? getString(R.string.unknown_content)
+                    : remotePlaylist.getUploader());
+            card.setOnClickListener(v -> NavigationHelper.openPlaylistFragment(getFM(),
+                    remotePlaylist.getServiceId(),
+                    remotePlaylist.getUrl(),
+                    playlistName));
+        }
 
         CoilHelper.INSTANCE.loadPlaylistThumbnail(thumbnail, playlist.getThumbnailUrl());
-        card.setOnClickListener(v -> NavigationHelper.openLocalPlaylistFragment(getFM(),
-                playlist.getUid(), playlistName));
         return card;
     }
 
@@ -299,7 +326,6 @@ public final class LibraryFragment extends BaseFragment {
         card.setPadding(dp(10), dp(10), dp(10), dp(10));
         card.setMinimumHeight(dp(104));
         card.setLayoutParams(previewCardLayoutParams());
-        keepPagerFromStealingHorizontalScroll(card);
         card.setClickable(true);
         card.setFocusable(true);
         applySelectableItemBackground(card);

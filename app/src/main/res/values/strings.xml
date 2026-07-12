@@ -36,7 +36,7 @@
     <string name="subscription_update_failed">Could not update subscription</string>
     <string name="show_info">Show info</string>
     <string name="tab_subscriptions">Subscriptions</string>
-    <string name="tab_bookmarks">Bookmarked Playlists</string>
+    <string name="tab_bookmarks">Playlists</string>
     <string name="tab_bookmarks_short">Playlists</string>
     <string name="tab_library">Library</string>
     <string name="library_subscriptions_summary">Channels and groups you follow</string>
@@ -52,6 +52,7 @@
     <string name="library_see_more_history_summary">Open full watch history.</string>
     <string name="library_empty_playlists">Add a playlist</string>
     <string name="library_empty_playlists_summary">Open playlists to start saving videos.</string>
+    <string name="library_create_playlist_summary">Create a new local playlist.</string>
     <plurals name="library_subscriptions_count">
         <item quantity="one">%d subscription</item>
         <item quantity="other">%d subscriptions</item>

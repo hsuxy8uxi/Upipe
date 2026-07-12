@@ -67,9 +67,9 @@ configure<ApplicationExtension> {
         minSdk = 21
         targetSdk = 35
 
-        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: 3
+        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: 4
 
-        versionName = "v1.2.0"
+        versionName = "v1.2.4"
         System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
